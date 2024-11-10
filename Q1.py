@@ -43,12 +43,24 @@ di = pd.to_datetime(list_comp).to_period('M')
 oztour.set_index(di, inplace=True)
 print(oztour)
 
+# 4a
 new_oztour = oztour.copy()
 new_oztour.rename(columns=lambda x: x[-3:], inplace=True)
 
 columnNames = oztour.columns.tolist() # get all column names
-columnNames = columnNames[2:] # remove 2 column     names Year, Month
-PoTArr = [columnName[-3:] for columnName in columnNames]
+columnNames = columnNames[2:] # remove 2 column names Year, Month
+potValues = [columnName[-3:] for columnName in columnNames] # get all purpose of travel value from column name
 
 # print(PoTArr)
-print(new_oztour.groupby(by=['Hol', 'Vis']).sum())
+series = pd.Series(potValues)
+# Get unique values
+potUniqueValues = series.unique() # get Hol, Vis, Bus, Oth
+
+for pot in potUniqueValues:
+    column_name_group_by = [col for col in oztour.columns if col.endswith(pot)] # get all column has same pot value
+    oztour[pot] = 0 # create new column in dataframe and set data value is 0
+    for cln in column_name_group_by:
+        oztour[pot] += oztour[cln] # data summed by pot
+
+PoT = oztour[potUniqueValues]
+print(PoT) # show pot columns
